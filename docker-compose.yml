@@ -1,0 +1,63 @@
+version: "3.9"
+name: shop_dtl
+
+networks:
+  shop_dtl:
+    name: shop_dtl
+
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: ./docker/nginx/Dockerfile
+    container_name: nginx
+    restart: always
+    networks:
+      - shop_dtl
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html:delegated
+    depends_on:
+      - laravel
+  laravel:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: laravel
+    networks:
+      - shop_dtl
+    volumes:
+      - .:/var/www/html:delegated
+    depends_on:
+      - mysql
+  mysql:
+    image: mysql:8.0
+    container_name: ${DB_HOST}
+    command: --default-authentication-plugin=mysql_native_password
+    networks:
+      - shop_dtl
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_HOST=${DB_HOST}
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - ./docker/mysql:/docker-entrypoint-initdb.d:delegated
+      - ./.docker/mysql-data:/var/lib/mysql:delegated
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    networks:
+      - shop_dtl
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOSTS=${DB_HOST}
+      - PMA_USER=${DB_USERNAME}
+      - PMA_PASSWORD=${DB_PASSWORD}
+    ports:
+      - 8081:80
