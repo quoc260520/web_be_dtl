@@ -5,8 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Cart extends Model
+class PasswordResetToken extends Model
 {
     use HasFactory;
-    protected $fillable = ['user_id'];
+    public $timestamps = false;
+    protected $fillable = [
+        'email',
+        'token',
+    ];
 }
