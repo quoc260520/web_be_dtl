@@ -19,7 +19,7 @@ class AdminSeeder extends Seeder
             ['email' =>  'admin@gmail.com'],
             [
                 'name' => 'admin',
-                'password' => Hash::make('1234568')
+                'password' => Hash::make('12345678')
             ]
         );
         $user->assignRole(config('auth.role_name.admin'));

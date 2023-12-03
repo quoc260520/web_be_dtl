@@ -17,7 +17,7 @@ class CategoryRepository extends BaseRepository
     {
         $category = $request->category;
         $paginate = $request->get('limit') ?? self::PAGE;
-        $categories = $this->model->when('name', function ($query) use ($category) {
+        $categories = $this->model->when($category, function ($query) use ($category) {
             $query->where('name', 'like', ['%'.$category.'%']);
         })->paginate($paginate);
         return [
@@ -64,6 +64,5 @@ class CategoryRepository extends BaseRepository
         return [
             'message' => 'Xóa loại sản phẩm thành công',
         ];
-
     }
 }

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -30,11 +31,20 @@ Route::prefix('auth')->group(function () {
     Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('auth.reset_password');
 });
 Route::prefix('category')->group(function () {
-    Route::get('/all', [CategoryController::class, 'index'])->name('category.register');
+    Route::get('/all', [CategoryController::class, 'index'])->name('category.list');
     Route::middleware(['auth:sanctum','role:admin'])->group(function () {
         Route::get('/{id}', [CategoryController::class, 'getById'])->name('category.get_by_id');
         Route::post('/create', [CategoryController::class, 'create'])->name('category.create');
         Route::post('/update/{id}', [CategoryController::class, 'update'])->name('category.update');
         Route::delete('/delete/{id}', [CategoryController::class, 'delete'])->name('category.delete');
+    });
+});
+Route::prefix('user')->group(function () {
+    Route::middleware(['auth:sanctum','role:admin'])->group(function () {
+        Route::get('/all', [UserController::class, 'index'])->name('user.list');
+        Route::get('/{id}', [UserController::class, 'getById'])->name('user.get_by_id');
+        Route::post('/create', [UserController::class, 'create'])->name('user.create');
+        Route::post('/update/{id}', [UserController::class, 'update'])->name('user.update');
+        Route::delete('/delete/{id}', [UserController::class, 'delete'])->name('user.delete');
     });
 });

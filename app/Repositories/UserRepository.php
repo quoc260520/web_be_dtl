@@ -18,14 +18,28 @@ use Illuminate\Support\Facades\Storage;
 
 class UserRepository extends BaseRepository
 {
+    const PAGE = 20;
     protected $model;
-
     public function __construct(User $model)
     {
         $this->model = $model;
     }
     public function getAll($request)
     {
+        $name = $request->name;
+        $email = $request->email;
+        $paginate = $request->get('limit') ?? self::PAGE;
+        $users = $this->model->with('roles:name')
+        ->when($name, function ($query) use ($name) {
+            $query->where('name', 'like', ['%'.$name.'%']);
+        })->when($email, function ($query) use ($email) {
+            $query->where('email', 'like', ['%'.$email.'%']);
+        })->paginate($paginate);
+        return [
+            'name' => $name,
+            'email' => $email,
+            'users' => $users
+        ];
     }
     public function getById($id)
     {
@@ -103,4 +117,60 @@ class UserRepository extends BaseRepository
             'message' => 'Đặt lại mật khẩu công'
         ];;
     }
+    public function create($data) {
+        try {
+            DB::beginTransaction();
+            $user = $this->model->create([
+                'name' => $data->name,
+                'email' => $data->email,
+                'password' => Hash::make($data->password),
+                'address' => $data->address,
+            ]);
+            $user->assignRole($data->role);
+            Cart::create([
+                'user_id' => $user->id,
+            ]);
+            DB::commit();
+            return [
+                'message' => 'Thêm người dùng thành công',
+            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+        }
+    }
+    public function update($id,$data) {
+        $user =  $this->model->find($id);
+        if(!$user) {
+            return [
+                'errors' => 'Not found',
+                'message' => 'Người dùng không tồn tại',
+            ];
+        }
+        $user->update([
+            'name' => $data->name ?? $user->name,
+            'email' => $data->email ?? $user->email,
+            'address' => $data->address ?? $user->address,
+        ]);
+        $user->syncRoles([]);
+        $user->assignRole($data->role);
+        return [
+            'message' => 'Cập nhật người dùng thành công',
+        ];
+    }
+
+    public function delete($id) {
+        $user =  $this->model->find($id);
+        if(!$user) {
+            return [
+                'errors' => 'Not found',
+                'message' => 'Người dùng không tồn tại',
+            ];
+        }
+        $user->delete();
+        return [
+            'message' => 'Xóa người dùng thành công',
+        ];
+    }
+
+
 }
