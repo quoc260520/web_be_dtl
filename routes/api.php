@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -48,3 +49,13 @@ Route::prefix('user')->group(function () {
         Route::delete('/delete/{id}', [UserController::class, 'delete'])->name('user.delete');
     });
 });
+Route::prefix('product')->group(function () {
+    Route::get('/all', [ProductController::class, 'index'])->name('user.list');
+    Route::get('/{id}', [ProductController::class, 'getById'])->name('user.get_by_id');
+    Route::middleware(['auth:sanctum','role:admin|client'])->group(function () {
+        Route::post('/create', [ProductController::class, 'create'])->name('user.create');
+        Route::post('/update/{id}', [ProductController::class, 'update'])->name('user.update');
+        Route::delete('/delete/{id}', [ProductController::class, 'delete'])->name('user.delete');
+    });
+});
+

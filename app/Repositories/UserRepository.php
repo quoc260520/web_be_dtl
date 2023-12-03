@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Http\Resources\UserCollection;
 use App\Mail\ResetPasswordMail;
 use App\Models\Cart;
 use App\Models\PasswordResetToken;
