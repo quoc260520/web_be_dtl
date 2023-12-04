@@ -14,18 +14,33 @@ class ProductRepository extends BaseRepository
     {
         $this->model = $model;
     }
-    public function getAll($request)
+    public function getAll($request, $userId = null)
     {
         $name = $request->name;
+        $category = $request->category ?? [];
+        $priceMin = $request->price_min;
+        $priceMax = $request->price_max;
         $paginate = $request->get('limit') ?? self::PAGE;
         $products = $this->model->when($name, function ($query) use ($name) {
             $query->where('name', 'like', ['%'.$name.'%']);
+        }) ->when($userId, function ($query) use ($userId) {
+            $query->where('user_id',$userId);
+        })->when(count($category), function ($query) use ($category) {
+            $query->whereIn('category_id',$category);
+        })->when($priceMin, function ($query) use ($priceMin) {
+            $query->where('price','>=',$priceMin);
+        })->when($priceMax, function ($query) use ($priceMax) {
+            $query->where('price','=<',$priceMax);
         })
         ->with('user:id,name')
         ->paginate($paginate);
         return [
+            'path_image' => asset('storage/product'),
             'name' => $name,
-            'categories' => $products
+            'category' => $category,
+            'price_min' => $priceMin,
+            'price_max' => $priceMax,
+            'products' => $products
         ];
     }
     public function getById($id)
@@ -33,7 +48,6 @@ class ProductRepository extends BaseRepository
         return $this->model->with('user:id,name')->findOrFail($id);
     }
     public function create($data) {
-        dd(asset('storage/product/q8fU9H1701613289.png'));
         $arrayImage = [];
         if ($data->hasFile('image')) {
             foreach ($data->file('image') as $file) {
@@ -45,7 +59,7 @@ class ProductRepository extends BaseRepository
             'user_id' => Auth::user()->id,
             'name' =>  $data->name,
             'quantity' =>  $data->quantity,
-            'status' =>  $data->status,
+            'status' =>  Auth::user()->hasRole('admin') ? Product::STATUS_APPROVE : PRODUCT::STATUS_UN_APPROVE,
             'price' =>  $data->price,
             'image' =>  json_encode($arrayImage),
             'description' =>  $data->description,
@@ -56,29 +70,52 @@ class ProductRepository extends BaseRepository
         ];
     }
     public function update($id, $data) {
-        $category =  $this->model->find($id);
-        if(!$category) {
+        if($data->image_delete) {
+            foreach(($data->image_delete) as $image) {
+                $this->deleteImage('product',$image);
+            }
+        }
+        $product =  $this->model->find($id);
+        if(!$product) {
             return [
                 'errors' => 'Not found',
-                'message' => 'sản phẩm không tồn tại',
+                'message' => 'Sản phẩm không tồn tại',
             ];
         }
-        $category->update([
-            'name'  => $data->name,
+        $arrayImage = array_diff(json_decode($product->image), $data->image_delete);
+        if ($data->hasFile('image')) {
+            foreach ($data->file('image') as $file) {
+                $arrayImage[] =  $this->uploadImage('product',$file);
+            }
+        }
+        $product->update([
+            'category_id' => $data->category ?? $product->category_id,
+            'name' =>  $data->name ??  $product->name,
+            'quantity' =>  $data->quantity  ??  $product->name,
+            'status' =>  $data->category,
+            'price' =>  $data->price  ??  $product->price,
+            'image' =>  json_encode($arrayImage),
+            'description' =>  $data->description ?? $product->description,
+            'note' =>  $data->note ?? $product->note,
         ]);
         return [
             'message' => 'Cập nhật sản phẩm thành công',
         ];
     }
     public function delete($id) {
-        $category =  $this->model->find($id);
-        if(!$category) {
+        $product =  $this->model->find($id);
+        if(!$product) {
             return [
                 'errors' => 'Not found',
-                'message' => 'sản phẩm không tồn tại',
+                'message' => 'Sản phẩm không tồn tại',
             ];
         }
-        $category->delete();
+        if($product->image) {
+            foreach(json_decode($product->image) as $image) {
+                $this->deleteImage('product',$image);
+            }
+        }
+        $product->delete();
         return [
             'message' => 'Xóa sản phẩm thành công',
         ];

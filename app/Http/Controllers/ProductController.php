@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ProductRequest;
 use App\Repositories\ProductRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
 
 class ProductController extends Controller
 {
@@ -16,7 +18,15 @@ class ProductController extends Controller
         return $this->responseData($this->productRepository->getAll($request));
     }
     public function getById($id){
-        return $this->resultResponse($this->productRepository->getById($id)->toArray());
+        return $this->resultResponse(
+            [
+                'path_image' => asset('storage/product'),
+                'product' => $this->productRepository->getById($id)->toArray()
+            ]
+        );
+    }
+    public function productByUser(Request $request){
+        return $this->responseData($this->productRepository->getAll($request, Auth::user()->id));
 
     }
     public function create(ProductRequest $request){

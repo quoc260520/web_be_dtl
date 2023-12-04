@@ -9,13 +9,8 @@ class BaseRepository
     public function uploadImage($folder, $image)
     {
         $imageName = Str::random(6) . time() . '.' . $image->extension();
-        // $path = Storage::disk('public')->put($folder . '/' . $imageName, file_get_contents($image));
-        $path = $image->storeAs(
-            $folder,
-            $imageName,
-            'public'
-        );
-        return $path;
+        Storage::disk('public')->put($folder . '/' . $imageName, file_get_contents($image));
+        return $imageName;
     }
     public function deleteImage($folder, $image)
     {

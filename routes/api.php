@@ -50,12 +50,30 @@ Route::prefix('user')->group(function () {
     });
 });
 Route::prefix('product')->group(function () {
-    Route::get('/all', [ProductController::class, 'index'])->name('user.list');
-    Route::get('/{id}', [ProductController::class, 'getById'])->name('user.get_by_id');
+    Route::get('/all', [ProductController::class, 'index'])->name('product.list');
+    Route::get('/{id}', [ProductController::class, 'getById'])->name('product.get_by_id');
     Route::middleware(['auth:sanctum','role:admin|client'])->group(function () {
-        Route::post('/create', [ProductController::class, 'create'])->name('user.create');
-        Route::post('/update/{id}', [ProductController::class, 'update'])->name('user.update');
-        Route::delete('/delete/{id}', [ProductController::class, 'delete'])->name('user.delete');
+        // Route::get('/by-user', [ProductController::class, 'productByUser'])->name('product.by-user');
+        Route::post('/create', [ProductController::class, 'create'])->name('product.create');
+    });
+    Route::middleware(['auth:sanctum','role:admin'])->group(function () {
+        Route::post('/update/{id}', [ProductController::class, 'update'])->name('product.update');
+        Route::delete('/delete/{id}', [ProductController::class, 'delete'])->name('product.delete');
     });
 });
-
+Route::prefix('product-user')->group(function () {
+    Route::middleware(['auth:sanctum','role:admin|client'])->group(function () {
+        Route::get('/by-user', [ProductController::class, 'productByUser'])->name('product.by-user');
+    });
+});
+Route::prefix('order')->group(function () {
+    Route::get('/all', [ProductController::class, 'index'])->name('order.list');
+    Route::get('/{id}', [ProductController::class, 'getById'])->name('order.get_by_id');
+    Route::middleware(['auth:sanctum','role:admin|client'])->group(function () {
+        Route::post('/create', [ProductController::class, 'create'])->name('order.create');
+    });
+    Route::middleware(['auth:sanctum','role:admin'])->group(function () {
+        Route::post('/update/{id}', [ProductController::class, 'update'])->name('order.update');
+        Route::delete('/delete/{id}', [ProductController::class, 'delete'])->name('order.delete');
+    });
+});

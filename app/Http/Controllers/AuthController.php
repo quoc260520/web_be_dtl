@@ -80,7 +80,7 @@ class AuthController extends Controller
                 ]);
             }
 
-            if (!Auth::attempt($request->only(['email', 'password']))) {
+            if (!Auth::guard('web')->attempt($request->only(['email', 'password']))) {
                 return $this->responseData( [
                     'code' => 400,
                     'message' => 'Email hoặc mật khẩu không chính xác',
