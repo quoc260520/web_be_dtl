@@ -13,7 +13,7 @@ class CartController extends Controller
         $this->cartRepository = $cartRepository;
     }
     public function index(Request $request) {
-
+        return $this->resultResponse($this->cartRepository->index($request));
     }
     public function add(Request $request) {
         return $this->resultResponse($this->cartRepository->add($request));

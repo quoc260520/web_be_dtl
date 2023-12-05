@@ -32,13 +32,9 @@ class CategoryRepository extends BaseRepository
     }
     public function create($data)
     {
-        $image = "";
-        if ($data->hasFile('image')) {
-            $image =  $this->uploadImage('category', $data->file('image'));
-        }
         $this->model->create([
             'name'  => $data->name,
-            'image' => $image
+            'image' => $data->image
         ]);
         return [
             'message' => 'Thêm loại sản phẩm thành công',
@@ -47,11 +43,6 @@ class CategoryRepository extends BaseRepository
     public function update($id, $data)
     {
         $category =  $this->model->find($id);
-        $image = $category->image;
-        if ($data->hasFile('image')) {
-            $image = $this->deleteImage('category', $image);
-            $image =  $this->uploadImage('category', $data->file('image'));
-        }
         if (!$category) {
             return [
                 'errors' => 'Not found',
@@ -60,7 +51,7 @@ class CategoryRepository extends BaseRepository
         }
         $category->update([
             'name'  => $data->name,
-            'image' => $image
+            'image' => $data->image
         ]);
         return [
             'message' => 'Cập nhật loại sản phẩm thành công',

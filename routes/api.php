@@ -65,6 +65,7 @@ Route::prefix('product')->group(function () {
         Route::post('/create', [ProductController::class, 'create'])->name('product.create');
     });
     Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+        Route::post('/change-status', [ProductController::class, 'changeStatus'])->name('product.change_status');
         Route::post('/update/{id}', [ProductController::class, 'update'])->name('product.update');
         Route::delete('/delete/{id}', [ProductController::class, 'delete'])->name('product.delete');
     });
@@ -75,4 +76,8 @@ Route::middleware(['auth:sanctum', 'role:admin|client'])->prefix('cart')->group(
         Route::post('/add', [CartController::class, 'add'])->name('cart.create');
         Route::post('/update/{id}', [CartController::class, 'update'])->name('cart.update');
         Route::delete('/delete/{id}', [CartController::class, 'delete'])->name('cart.delete');
+});
+Route::middleware(['auth:sanctum', 'role:admin|client'])->prefix('image')->group(function () {
+    Route::post('/upload', [ProductController::class, 'updateImage'])->name('image.upload');
+    Route::post('/delete', [ProductController::class, 'deleteImage'])->name('image.delete');
 });

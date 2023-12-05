@@ -17,7 +17,7 @@ class CategoryRequest extends BaseRequest
                 'min:3',
                 'max:100',
             ],
-            'image' => 'nullable', 'file', 'image', 'mimes:jpeg,jpg,png,gif',
+            'image' => 'nullable', 'string',
         ];
     }
     public function attributes(): array

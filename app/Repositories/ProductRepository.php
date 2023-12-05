@@ -48,12 +48,6 @@ class ProductRepository extends BaseRepository
         return $this->model->with('user:id,name')->findOrFail($id);
     }
     public function create($data) {
-        $arrayImage = [];
-        if ($data->hasFile('image')) {
-            foreach ($data->file('image') as $file) {
-                $arrayImage[] =  $this->uploadImage('product',$file);
-            }
-        }
         $this->model->create([
             'category_id' => $data->category,
             'user_id' => Auth::user()->id,
@@ -61,7 +55,7 @@ class ProductRepository extends BaseRepository
             'quantity' =>  $data->quantity,
             'status' =>  Auth::user()->hasRole('admin') ? Product::STATUS_APPROVE : PRODUCT::STATUS_UN_APPROVE,
             'price' =>  $data->price,
-            'image' =>  json_encode($arrayImage),
+            'image' =>  json_encode($data->image),
             'description' =>  $data->description,
             'note' =>  $data->note,
         ]);
@@ -70,11 +64,6 @@ class ProductRepository extends BaseRepository
         ];
     }
     public function update($id, $data) {
-        if($data->image_delete) {
-            foreach(($data->image_delete) as $image) {
-                $this->deleteImage('product',$image);
-            }
-        }
         $product =  $this->model->find($id);
         if(!$product) {
             return [
@@ -82,19 +71,13 @@ class ProductRepository extends BaseRepository
                 'message' => 'Sản phẩm không tồn tại',
             ];
         }
-        $arrayImage = array_diff(json_decode($product->image), $data->image_delete);
-        if ($data->hasFile('image')) {
-            foreach ($data->file('image') as $file) {
-                $arrayImage[] =  $this->uploadImage('product',$file);
-            }
-        }
         $product->update([
             'category_id' => $data->category ?? $product->category_id,
             'name' =>  $data->name ??  $product->name,
             'quantity' =>  $data->quantity  ??  $product->name,
             'status' =>  $data->category,
             'price' =>  $data->price  ??  $product->price,
-            'image' =>  json_encode($arrayImage),
+            'image' =>  json_encode($data->image) ?? $product->image,
             'description' =>  $data->description ?? $product->description,
             'note' =>  $data->note ?? $product->note,
         ]);
@@ -118,6 +101,30 @@ class ProductRepository extends BaseRepository
         $product->delete();
         return [
             'message' => 'Xóa sản phẩm thành công',
+        ];
+    }
+    public function uploadImg($data) {
+        if ($data->hasFile('image')) {
+            $imageName =  $this->uploadImage($data->folder,$data->file('image'));
+            return [
+                'image' => $imageName
+            ];
+        }
+        return [
+            'error' => 'Error',
+            'message' => 'Upload image failed',
+        ];
+    }
+    public function deleteImg($data) {
+        $this->deleteImage($data->folder, $data->image);
+        return [
+            'message' => 'Success',
+        ];
+    }
+    public function changeStatus($data) {
+        $this->model->whereIn('id', $data->products)->update(['status'=> $data->status]);
+        return [
+            'message' => 'Success',
         ];
     }
 }

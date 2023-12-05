@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\Cart;
 use App\Models\CartDetail;
 use App\Models\Product;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
 class CartRepository extends BaseRepository
@@ -20,13 +21,13 @@ class CartRepository extends BaseRepository
     }
     public function index($request)
     {
-        // $cart = $this->model->with(['cartDetail.product', 'cartDetail' => function($q){
-        //     return $this->model->orderBy('id','desc')->paginate(
-        // }])->get();
-        // return [
-        //     'path_image' => asset('storage/product'),
-        //     'cart' => $cart
-        // ];
+        $cart = $this->model->where('user_id', Auth::user()->id)->with([
+            'cartDetails.product',
+           ])->get();
+        return [
+            'path_image' => asset('storage/product'),
+            'cart' => $cart
+        ];
     }
     public function add($data) {
         $cart = $this->model->where('user_id', Auth::user()->id)->first();
