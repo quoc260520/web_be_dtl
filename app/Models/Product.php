@@ -24,6 +24,7 @@ class Product extends Model
         'user_id',
         'name',
         'quantity',
+        'price',
         'status',
         'image',
         'description',

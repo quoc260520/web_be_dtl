@@ -25,14 +25,15 @@ class ProductRepository extends BaseRepository
             $query->where('name', 'like', ['%'.$name.'%']);
         }) ->when($userId, function ($query) use ($userId) {
             $query->where('user_id',$userId);
-        })->when(count($category), function ($query) use ($category) {
-            $query->whereIn('category_id',$category);
+        })->when(count(json_decode($category)), function ($query) use ($category) {
+            $query->whereIn('category_id',json_decode($category));
         })->when($priceMin, function ($query) use ($priceMin) {
-            $query->where('price','>=',$priceMin);
+            $query->where('price','>=',(int)$priceMin);
         })->when($priceMax, function ($query) use ($priceMax) {
-            $query->where('price','=<',$priceMax);
+            $query->where('price','<=',(int)$priceMax);
         })
         ->with('user:id,name')
+        ->select('id','price')
         ->paginate($paginate);
         return [
             'path_image' => asset('storage/product'),
@@ -107,6 +108,7 @@ class ProductRepository extends BaseRepository
         if ($data->hasFile('image')) {
             $imageName =  $this->uploadImage($data->folder,$data->file('image'));
             return [
+                'path_image' => asset('storage/'.$data->folder),
                 'image' => $imageName
             ];
         }
