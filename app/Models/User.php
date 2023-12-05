@@ -16,6 +16,8 @@ class User extends Authenticatable
     const ROLE_ADMIN = 'admin';
     const ROLE_CLIENT = 'client';
 
+    public $guard_name = 'api';
+
     /**
      * The attributes that are mass assignable.
      *
