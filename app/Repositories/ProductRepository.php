@@ -17,9 +17,10 @@ class ProductRepository extends BaseRepository
     public function getAll($request, $userId = null)
     {
         $name = $request->name;
-        $category = $request->category ?? [];
+        $category = $request->category ?? '[]';
         $priceMin = $request->price_min;
         $priceMax = $request->price_max;
+        $status = $request->status;
         $paginate = $request->get('limit') ?? self::PAGE;
         $products = $this->model->when($name, function ($query) use ($name) {
             $query->where('name', 'like', ['%'.$name.'%']);
@@ -31,9 +32,10 @@ class ProductRepository extends BaseRepository
             $query->where('price','>=',(int)$priceMin);
         })->when($priceMax, function ($query) use ($priceMax) {
             $query->where('price','<=',(int)$priceMax);
+        })->when($status, function ($query) use ($status) {
+            $query->where('status','=',(int)$status);
         })
         ->with('user:id,name')
-        ->select('id','price')
         ->paginate($paginate);
         return [
             'path_image' => asset('storage/product'),
