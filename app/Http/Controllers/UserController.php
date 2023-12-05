@@ -19,6 +19,10 @@ class UserController extends Controller
         return $this->resultResponse($this->userRepository->getById($id)->toArray());
 
     }
+    public function me()
+    {
+        return $this->resultResponse($this->userRepository->me());
+    }
     public function create(UserRequest $request){
         return $this->resultResponse($this->userRepository->create($request));
     }

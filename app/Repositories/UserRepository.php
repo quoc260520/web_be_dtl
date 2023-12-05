@@ -31,11 +31,11 @@ class UserRepository extends BaseRepository
         $email = $request->email;
         $paginate = $request->get('limit') ?? self::PAGE;
         $users = $this->model->with('roles:name')
-        ->when($name, function ($query) use ($name) {
-            $query->where('name', 'like', ['%'.$name.'%']);
-        })->when($email, function ($query) use ($email) {
-            $query->where('email', 'like', ['%'.$email.'%']);
-        })->paginate($paginate);
+            ->when($name, function ($query) use ($name) {
+                $query->where('name', 'like', ['%' . $name . '%']);
+            })->when($email, function ($query) use ($email) {
+                $query->where('email', 'like', ['%' . $email . '%']);
+            })->paginate($paginate);
         return [
             'name' => $name,
             'email' => $email,
@@ -46,7 +46,14 @@ class UserRepository extends BaseRepository
     {
         return $this->model->findOrFail($id);
     }
-    public function createUser($data) {
+    public function me()
+    {
+        $user = $this->model->with(['cart:id,user_id', 'cart.cartDetails'])->findOrFail(Auth::user()->id);
+        $totalProductCart = $user->cart->cartDetails->sum('quantity');
+        return ['user' => $user->toArray(), 'totalProductCart' => $totalProductCart];
+    }
+    public function createUser($data)
+    {
         try {
             DB::beginTransaction();
             $user = $this->model->create([
@@ -63,25 +70,26 @@ class UserRepository extends BaseRepository
         } catch (\Exception $e) {
             DB::rollBack();
         }
-
     }
-    public function sendMailResetPassword($email) {
-        $user = $this->model->where('email',$email)->first();
-        $token = rand(100000,999999);
-        PasswordResetToken::where('email',$user->email)->delete();
+    public function sendMailResetPassword($email)
+    {
+        $user = $this->model->where('email', $email)->first();
+        $token = rand(100000, 999999);
+        PasswordResetToken::where('email', $user->email)->delete();
         PasswordResetToken::create(
             [
                 'email' => $email,
-                'token'=> $token,
+                'token' => $token,
                 'created_at' => time()
             ]
         );
         Mail::to($email)->send(new ResetPasswordMail($token));
         return $user;
     }
-    public function checkToken($email, $token) {
-        $token = PasswordResetToken::where('email',$email)->where('token',$token)->first();
-        if(!$token) {
+    public function checkToken($email, $token)
+    {
+        $token = PasswordResetToken::where('email', $email)->where('token', $token)->first();
+        if (!$token) {
             return [
                 'code' => 400,
                 'errors' => true,
@@ -90,7 +98,7 @@ class UserRepository extends BaseRepository
         }
         $now = Carbon::now();
         $startTime = Carbon::parse($token->created_at);
-        if ( $startTime->diffInHours($now) > 12) {
+        if ($startTime->diffInHours($now) > 12) {
             return [
                 'code' => 400,
                 'errors' => true,
@@ -102,23 +110,25 @@ class UserRepository extends BaseRepository
             'message' => 'Thành công'
         ];
     }
-    public function resetPassword($email, $token, $password) {
+    public function resetPassword($email, $token, $password)
+    {
         $check = $this->checkToken($email, $token);
-        if($check['code'] !== 200) {
+        if ($check['code'] !== 200) {
             return [
                 'code' => 400,
                 'errors' => true,
                 'message' => $check['message']
             ];
         }
-        $user = $this->model->where('email',$email)->update(['password' => Hash::make($password)]);
-        PasswordResetToken::where('email',$email)->delete();
+        $user = $this->model->where('email', $email)->update(['password' => Hash::make($password)]);
+        PasswordResetToken::where('email', $email)->delete();
         return [
             'code' => 200,
             'message' => 'Đặt lại mật khẩu công'
         ];;
     }
-    public function create($data) {
+    public function create($data)
+    {
         try {
             DB::beginTransaction();
             $user = $this->model->create([
@@ -139,9 +149,10 @@ class UserRepository extends BaseRepository
             DB::rollBack();
         }
     }
-    public function update($id,$data) {
+    public function update($id, $data)
+    {
         $user =  $this->model->find($id);
-        if(!$user) {
+        if (!$user) {
             return [
                 'errors' => 'Not found',
                 'message' => 'Người dùng không tồn tại',
@@ -159,9 +170,10 @@ class UserRepository extends BaseRepository
         ];
     }
 
-    public function delete($id) {
+    public function delete($id)
+    {
         $user =  $this->model->find($id);
-        if(!$user) {
+        if (!$user) {
             return [
                 'errors' => 'Not found',
                 'message' => 'Người dùng không tồn tại',
@@ -172,6 +184,4 @@ class UserRepository extends BaseRepository
             'message' => 'Xóa người dùng thành công',
         ];
     }
-
-
 }

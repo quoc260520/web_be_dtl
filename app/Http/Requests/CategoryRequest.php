@@ -17,12 +17,14 @@ class CategoryRequest extends BaseRequest
                 'min:3',
                 'max:100',
             ],
+            'image' => 'nullable', 'file', 'image', 'mimes:jpeg,jpg,png,gif',
         ];
     }
     public function attributes(): array
     {
         return [
             'name' => 'tên loại sản phẩm',
+            'image' => 'ảnh'
         ];
     }
 }
