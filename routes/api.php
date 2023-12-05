@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
@@ -69,14 +70,9 @@ Route::prefix('product')->group(function () {
     });
 });
 
-Route::prefix('order')->group(function () {
-    Route::get('/all', [ProductController::class, 'index'])->name('order.list');
-    Route::get('/{id}', [ProductController::class, 'getById'])->name('order.get_by_id');
-    Route::middleware(['auth:sanctum', 'role:admin|client'])->group(function () {
-        Route::post('/create', [ProductController::class, 'create'])->name('order.create');
-    });
-    Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
-        Route::post('/update/{id}', [ProductController::class, 'update'])->name('order.update');
-        Route::delete('/delete/{id}', [ProductController::class, 'delete'])->name('order.delete');
-    });
+Route::middleware(['auth:sanctum', 'role:admin|client'])->prefix('cart')->group(function () {
+        Route::get('/', [CartController::class, 'index'])->name('cart.index');
+        Route::post('/add', [CartController::class, 'add'])->name('cart.create');
+        Route::post('/update/{id}', [CartController::class, 'update'])->name('cart.update');
+        Route::delete('/delete/{id}', [CartController::class, 'delete'])->name('cart.delete');
 });
