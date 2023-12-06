@@ -19,6 +19,9 @@ class ProductController extends Controller
     public function index(Request $request){
         return $this->responseData($this->productRepository->getAll($request));
     }
+    public function getTopOrder(Request $request){
+        return $this->responseData($this->productRepository->getTopOrder($request));
+    }
     public function getById($id){
         return $this->resultResponse(
             [

@@ -2,17 +2,21 @@
 
 namespace App\Repositories;
 
+use App\Models\OrderDetail;
 use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ProductRepository extends BaseRepository
 {
     const PAGE = 20;
     protected $model;
+    protected $orderDetail;
 
-    public function __construct(Product $model)
+    public function __construct(Product $model, OrderDetail $orderDetail)
     {
         $this->model = $model;
+        $this->orderDetail = $orderDetail;
     }
     public function getAll($request, $userId = null)
     {
@@ -46,6 +50,20 @@ class ProductRepository extends BaseRepository
             'price_max' => $priceMax,
             'products' => $products
         ];
+    }
+    public function getTopOrder($request) {
+        $collection = $this->orderDetail::groupBy('product_id')
+                    ->selectRaw('count(*) as total, product_id')
+                    ->orderBy('total','desc')
+                    ->take(10)
+                    ->pluck('product_id');
+        $product = $this->model->whereIn('id',$collection->toArray())->with('user:id,name', 'category:id,name')->get();
+            if(count($product) == 10) {
+                return $product;
+            } else {
+                $productBonus = $this->model->whereNotIn('id',$collection->toArray())->with('user:id,name', 'category:id,name')->take(10 - count($product))->get();
+                return array_merge($product->toArray(), $productBonus->toArray());
+            }
     }
     public function getById($id)
     {

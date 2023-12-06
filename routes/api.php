@@ -59,6 +59,7 @@ Route::prefix('user')->group(function () {
 
 Route::prefix('product')->group(function () {
     Route::get('/all', [ProductController::class, 'index'])->name('product.list');
+    Route::get('/get-top-order', [ProductController::class, 'getTopOrder'])->name('product.get_top_order');
     Route::middleware(['auth:sanctum', 'role:admin|client'])->get('/by-user', [ProductController::class, 'productByUser'])->name('product.by_user');
     Route::get('/{id}', [ProductController::class, 'getById'])->name('product.get_by_id');
     Route::middleware(['auth:sanctum', 'role:admin|client'])->group(function () {
