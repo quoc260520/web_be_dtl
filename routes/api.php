@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -81,4 +82,13 @@ Route::middleware(['auth:sanctum', 'role:admin|client'])->prefix('cart')->group(
 Route::middleware(['auth:sanctum', 'role:admin|client'])->prefix('image')->group(function () {
     Route::post('/upload', [ProductController::class, 'updateImage'])->name('image.upload');
     Route::post('/delete', [ProductController::class, 'deleteImage'])->name('image.delete');
+});
+
+Route::middleware(['auth:sanctum', 'role:admin|client'])->prefix('order')->group(function () {
+    Route::get('/get-by-user', [OrderController::class, 'getByUser'])->name('order.get_by_user');
+    Route::get('/', [OrderController::class, 'index'])->name('order.index');
+    Route::get('/{id}', [OrderController::class, 'getById'])->name('order.get_by_id');
+    Route::post('/create', [OrderController::class, 'create'])->name('order.create');
+    Route::post('/update/{id}', [OrderController::class, 'update'])->name('order.update');
+    Route::delete('/delete/{id}', [OrderController::class, 'delete'])->name('order.delete');
 });
