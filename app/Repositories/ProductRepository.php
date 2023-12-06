@@ -23,22 +23,24 @@ class ProductRepository extends BaseRepository
         $status = $request->status;
         $paginate = $request->get('limit') ?? self::PAGE;
         $products = $this->model->when($name, function ($query) use ($name) {
-            $query->where('name', 'like', ['%'.$name.'%']);
-        }) ->when($userId, function ($query) use ($userId) {
-            $query->where('user_id',$userId);
+            $query->where('name', 'like', ['%' . $name . '%']);
+        })->when($userId, function ($query) use ($userId) {
+            $query->where('user_id', $userId);
         })->when(count(json_decode($category)), function ($query) use ($category) {
-            $query->whereIn('category_id',json_decode($category));
+            $query->whereIn('category_id', json_decode($category));
         })->when($priceMin, function ($query) use ($priceMin) {
-            $query->where('price','>=',(int)$priceMin);
+            $query->where('price', '>=', (int)$priceMin);
         })->when($priceMax, function ($query) use ($priceMax) {
-            $query->where('price','<=',(int)$priceMax);
-        })->when($status, function ($query) use ($status) {
-            $query->where('status','=',(int)$status);
+            $query->where('price', '<=', (int)$priceMax);
+        })->when(is_numeric($status), function ($query) use ($status) {
+            $query->where('status', '=', (int)$status);
         })
-        ->with('user:id,name')
-        ->paginate($paginate);
+            ->with('user:id,name', 'category:id,name')
+            ->paginate($paginate);
+        dd($products->toArray());
         return [
             'path_image' => asset('storage/product'),
+            'status' => $status,
             'name' => $name,
             'category' => $category,
             'price_min' => $priceMin,
@@ -50,7 +52,8 @@ class ProductRepository extends BaseRepository
     {
         return $this->model->with('user:id,name')->findOrFail($id);
     }
-    public function create($data) {
+    public function create($data)
+    {
         $this->model->create([
             'category_id' => $data->category,
             'user_id' => Auth::user()->id,
@@ -66,9 +69,10 @@ class ProductRepository extends BaseRepository
             'message' => 'Thêm sản phẩm thành công',
         ];
     }
-    public function update($id, $data) {
+    public function update($id, $data)
+    {
         $product =  $this->model->find($id);
-        if(!$product) {
+        if (!$product) {
             return [
                 'errors' => 'Not found',
                 'message' => 'Sản phẩm không tồn tại',
@@ -88,17 +92,18 @@ class ProductRepository extends BaseRepository
             'message' => 'Cập nhật sản phẩm thành công',
         ];
     }
-    public function delete($id) {
+    public function delete($id)
+    {
         $product =  $this->model->find($id);
-        if(!$product) {
+        if (!$product) {
             return [
                 'errors' => 'Not found',
                 'message' => 'Sản phẩm không tồn tại',
             ];
         }
-        if($product->image) {
-            foreach(json_decode($product->image) as $image) {
-                $this->deleteImage('product',$image);
+        if ($product->image) {
+            foreach (json_decode($product->image) as $image) {
+                $this->deleteImage('product', $image);
             }
         }
         $product->delete();
@@ -106,11 +111,12 @@ class ProductRepository extends BaseRepository
             'message' => 'Xóa sản phẩm thành công',
         ];
     }
-    public function uploadImg($data) {
+    public function uploadImg($data)
+    {
         if ($data->hasFile('image')) {
-            $imageName =  $this->uploadImage($data->folder,$data->file('image'));
+            $imageName =  $this->uploadImage($data->folder, $data->file('image'));
             return [
-                'path_image' => asset('storage/'.$data->folder),
+                'path_image' => asset('storage/' . $data->folder),
                 'image' => $imageName
             ];
         }
@@ -119,14 +125,16 @@ class ProductRepository extends BaseRepository
             'message' => 'Upload image failed',
         ];
     }
-    public function deleteImg($data) {
+    public function deleteImg($data)
+    {
         $this->deleteImage($data->folder, $data->image);
         return [
             'message' => 'Success',
         ];
     }
-    public function changeStatus($data) {
-        $this->model->whereIn('id', $data->products)->update(['status'=> $data->status]);
+    public function changeStatus($data)
+    {
+        $this->model->whereIn('id', $data->products)->update(['status' => $data->status]);
         return [
             'message' => 'Success',
         ];

@@ -45,7 +45,16 @@ class Product extends Model
     protected $casts = [
         'image' => 'array',
     ];
-    public function user() {
+    public function getImageAttribute($value)
+    {
+        return json_decode($value, true );
+    }
+    public function user()
+    {
         return $this->belongsTo(User::class);
+    }
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
     }
 }
