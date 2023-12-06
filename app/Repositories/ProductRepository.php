@@ -37,7 +37,6 @@ class ProductRepository extends BaseRepository
         })
             ->with('user:id,name', 'category:id,name')
             ->paginate($paginate);
-        dd($products->toArray());
         return [
             'path_image' => asset('storage/product'),
             'status' => $status,
