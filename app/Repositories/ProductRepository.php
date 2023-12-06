@@ -57,11 +57,16 @@ class ProductRepository extends BaseRepository
                     ->orderBy('total','desc')
                     ->take(10)
                     ->pluck('product_id');
-        $product = $this->model->whereIn('id',$collection->toArray())->with('user:id,name', 'category:id,name')->get();
+        $product = $this->model->whereIn('id',$collection->toArray())->with('user:id,name', 'category:id,name')
+                    ->where('status', [Product::STATUS_APPROVE])
+                    ->get();
             if(count($product) == 10) {
                 return $product;
             } else {
-                $productBonus = $this->model->whereNotIn('id',$collection->toArray())->with('user:id,name', 'category:id,name')->take(10 - count($product))->get();
+                $productBonus = $this->model->whereNotIn('id',$collection->toArray())
+                                ->where('status', [Product::STATUS_APPROVE])
+                                ->with('user:id,name', 'category:id,name')
+                                ->take(10 - count($product))->get();
                 return array_merge($product->toArray(), $productBonus->toArray());
             }
     }
