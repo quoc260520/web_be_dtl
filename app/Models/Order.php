@@ -17,7 +17,7 @@ class Order extends Model
     const STATUS_SUCCESS = 4;
     const STATUS_CANCEL = 5;
 
-    protected $fillable = ['user_id', 'phone', 'total_price', 'kind_of_payment', 'status', 'address', 'date_order', 'date_receipt'];
+    protected $fillable = ['user_id', 'phone', 'total_price', 'kind_of_payment','bill_id', 'status', 'address', 'date_order', 'date_receipt'];
     public function orderDetails() {
         return $this->hasMany(OrderDetail::class);
     }

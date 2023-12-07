@@ -21,7 +21,7 @@ class ProductRepository extends BaseRepository
     public function getAll($request, $userId = null)
     {
         $name = $request->name;
-        $category = $request->category ?? [];
+        $category = is_numeric($request->category) ? [$request->category] : ($request->category ?? []);
         $priceMin = $request->price_min;
         $priceMax = $request->price_max;
         $status = $request->status;

@@ -90,6 +90,7 @@ class OrderRepository extends BaseRepository
                     'price' => $item->product->price
                 ];
                 $totalOrder += (float)($item->quantity * $item->product->price);
+                Product::find($item->product_id)->decrement('quantity',$item->quantity);
                 $item->delete();
             }
             $order = $this->model->create([
