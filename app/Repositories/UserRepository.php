@@ -6,16 +6,12 @@ use App\Http\Resources\UserCollection;
 use App\Mail\ResetPasswordMail;
 use App\Models\Cart;
 use App\Models\PasswordResetToken;
-use Illuminate\Support\Str;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
 
 class UserRepository extends BaseRepository
 {
@@ -131,6 +127,11 @@ class UserRepository extends BaseRepository
     {
         try {
             DB::beginTransaction();
+            $userSoft = $this->model->onlyTrashed()->where('email', $data->email)->first();
+            if ($userSoft) {
+                $userSoft->cart()->forceDelete();
+                $userSoft->forceDelete();
+            }
             $user = $this->model->create([
                 'name' => $data->name,
                 'email' => $data->email,
@@ -147,6 +148,10 @@ class UserRepository extends BaseRepository
             ];
         } catch (\Exception $e) {
             DB::rollBack();
+            return [
+                'errors' => true,
+                'message' => 'Thêm người dùng không thành công',
+            ];
         }
     }
     public function update($id, $data)
