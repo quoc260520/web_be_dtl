@@ -21,7 +21,7 @@ class ProductRepository extends BaseRepository
     public function getAll($request, $userId = null)
     {
         $name = $request->name;
-        $category = $request->category ?? '[]';
+        $category = $request->category ?? [];
         $priceMin = $request->price_min;
         $priceMax = $request->price_max;
         $status = $request->status;
@@ -30,8 +30,8 @@ class ProductRepository extends BaseRepository
             $query->where('name', 'like', ['%' . $name . '%']);
         })->when($userId, function ($query) use ($userId) {
             $query->where('user_id', $userId);
-        })->when(count(json_decode($category)), function ($query) use ($category) {
-            $query->whereIn('category_id', json_decode($category));
+        })->when(count($category), function ($query) use ($category) {
+            $query->whereIn('category_id',$category);
         })->when($priceMin, function ($query) use ($priceMin) {
             $query->where('price', '>=', (int)$priceMin);
         })->when($priceMax, function ($query) use ($priceMax) {
@@ -41,6 +41,8 @@ class ProductRepository extends BaseRepository
         })
             ->with('user:id,name', 'category:id,name')
             ->paginate($paginate);
+        $minPrice =  $this->model->where('status', Product::STATUS_APPROVE)->min("price");
+        $maxPrice =  $this->model->where('status', Product::STATUS_APPROVE)->max("price");
         return [
             'path_image' => asset('storage/product'),
             'status' => $status,
@@ -48,7 +50,9 @@ class ProductRepository extends BaseRepository
             'category' => $category,
             'price_min' => $priceMin,
             'price_max' => $priceMax,
-            'products' => $products
+            'min_price' => $minPrice,
+            'max_price' => $maxPrice,
+            'products' => $products,
         ];
     }
     public function getTopOrder($request) {
