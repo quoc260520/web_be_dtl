@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
@@ -74,10 +75,10 @@ Route::prefix('product')->group(function () {
 });
 
 Route::middleware(['auth:sanctum', 'role:admin|client'])->prefix('cart')->group(function () {
-        Route::get('/', [CartController::class, 'index'])->name('cart.index');
-        Route::post('/add', [CartController::class, 'add'])->name('cart.create');
-        Route::post('/update/{id}', [CartController::class, 'update'])->name('cart.update');
-        Route::delete('/delete/{id}', [CartController::class, 'delete'])->name('cart.delete');
+    Route::get('/', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/add', [CartController::class, 'add'])->name('cart.create');
+    Route::post('/update/{id}', [CartController::class, 'update'])->name('cart.update');
+    Route::delete('/delete/{id}', [CartController::class, 'delete'])->name('cart.delete');
 });
 Route::middleware(['auth:sanctum', 'role:admin|client'])->prefix('image')->group(function () {
     Route::post('/upload', [ProductController::class, 'updateImage'])->name('image.upload');
@@ -91,4 +92,8 @@ Route::middleware(['auth:sanctum', 'role:admin|client'])->prefix('order')->group
     Route::post('/create', [OrderController::class, 'create'])->name('order.create');
     Route::post('/update/{id}', [OrderController::class, 'update'])->name('order.update');
     Route::delete('/delete/{id}', [OrderController::class, 'delete'])->name('order.delete');
+});
+
+Route::middleware(['auth:sanctum', 'role:admin'])->prefix('statistics')->group(function () {
+    Route::get('/', [DashboardController::class, 'statistics'])->name('statistics');
 });

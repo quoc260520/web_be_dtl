@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\OrderRequest;
 use App\Repositories\OrderRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,7 +23,7 @@ class OrderController extends Controller
     public function getById(Request $request, $id) {
         return $this->resultResponse($this->orderRepository->getById($id)->toArray());
     }
-    public function create(Request $request) {
+    public function create(OrderRequest $request) {
         return $this->resultResponse($this->orderRepository->create($request));
     }
     public function update(Request $request, $id) {
