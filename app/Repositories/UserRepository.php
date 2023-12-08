@@ -2,7 +2,6 @@
 
 namespace App\Repositories;
 
-use App\Http\Resources\UserCollection;
 use App\Mail\ResetPasswordMail;
 use App\Models\Cart;
 use App\Models\PasswordResetToken;
@@ -33,6 +32,7 @@ class UserRepository extends BaseRepository
                 $query->where('email', 'like', ['%' . $email . '%']);
             })->paginate($paginate);
         return [
+            'path_image' => asset('storage/user'),
             'name' => $name,
             'email' => $email,
             'users' => $users
@@ -46,12 +46,21 @@ class UserRepository extends BaseRepository
     {
         $user = $this->model->with(['cart:id,user_id', 'cart.cartDetails'])->findOrFail(Auth::user()->id);
         $totalProductCart = $user->cart->cartDetails->sum('quantity');
-        return ['user' => $user->toArray(), 'totalProductCart' => $totalProductCart];
+        return [
+            'user' => $user->toArray(),
+            'totalProductCart' => $totalProductCart,
+            'path_image' => asset('storage/user')
+        ];
     }
     public function createUser($data)
     {
         try {
             DB::beginTransaction();
+            $userSoft = $this->model->onlyTrashed()->where('email', $data->email)->first();
+            if ($userSoft) {
+                $userSoft->cart()->forceDelete();
+                $userSoft->forceDelete();
+            }
             $user = $this->model->create([
                 'name' => $data->name,
                 'email' => $data->email,
@@ -135,6 +144,7 @@ class UserRepository extends BaseRepository
             $user = $this->model->create([
                 'name' => $data->name,
                 'email' => $data->email,
+                'image' => $data->image,
                 'password' => Hash::make($data->password),
                 'address' => $data->address,
             ]);
@@ -163,9 +173,15 @@ class UserRepository extends BaseRepository
                 'message' => 'Người dùng không tồn tại',
             ];
         }
+        $userSoft = $this->model->onlyTrashed()->where('email', $data->email)->first();
+        if ($userSoft) {
+            $userSoft->cart()->forceDelete();
+            $userSoft->forceDelete();
+        }
         $user->update([
             'name' => $data->name ?? $user->name,
             'email' => $data->email ?? $user->email,
+            'image' => $data->image ?? $user->image,
             'address' => $data->address ?? $user->address,
         ]);
         $user->syncRoles([]);
@@ -183,6 +199,9 @@ class UserRepository extends BaseRepository
                 'errors' => 'Not found',
                 'message' => 'Người dùng không tồn tại',
             ];
+        }
+        if ($user->image) {
+            $this->deleteImage('user', $user->image);
         }
         $user->delete();
         return [

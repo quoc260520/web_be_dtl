@@ -30,6 +30,7 @@ Route::get('/check', function (Request $request) {
 });
 
 Route::middleware('auth:sanctum')->get('/me', [UserController::class, 'me'])->name('me');
+Route::middleware('auth:sanctum')->get('/update-me', [UserController::class, 'updateMe'])->name('user.update_me');
 
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register'])->name('auth.register');

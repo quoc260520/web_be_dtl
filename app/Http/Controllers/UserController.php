@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UserRequest;
 use App\Repositories\UserRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -16,8 +17,10 @@ class UserController extends Controller
         return $this->responseData($this->userRepository->getAll($request));
     }
     public function getById($id){
-        return $this->resultResponse($this->userRepository->getById($id)->toArray());
-
+        return $this->resultResponse([
+            'path_image' => asset('storage/user'),
+            'user' => $this->userRepository->getById($id)->toArray()
+        ]);
     }
     public function me()
     {
@@ -30,6 +33,9 @@ class UserController extends Controller
 
     public function update(UserRequest $request, $id){
         return $this->resultResponse($this->userRepository->update($id, $request));
+    }
+    public function updateMe(UserRequest $request){
+        return $this->resultResponse($this->userRepository->update(Auth::user()->id, $request));
     }
     public function delete($id){
         return $this->resultResponse($this->userRepository->delete($id));

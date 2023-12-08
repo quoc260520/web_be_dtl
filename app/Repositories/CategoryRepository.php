@@ -21,7 +21,6 @@ class CategoryRepository extends BaseRepository
             $query->where('name', 'like', ['%' . $category . '%']);
         })->paginate($paginate);
         return [
-            'path_image' => asset('storage/category'),
             'category' => $category,
             'categories' => $categories
         ];
