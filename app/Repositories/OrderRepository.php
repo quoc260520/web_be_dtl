@@ -9,6 +9,7 @@ use App\Models\Product;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Srmklive\PayPal\Services\PayPal as PayPalClient;
 
 class OrderRepository extends BaseRepository
 {
@@ -90,7 +91,7 @@ class OrderRepository extends BaseRepository
                     'price' => $item->product->price
                 ];
                 $totalOrder += (float)($item->quantity * $item->product->price);
-                Product::find($item->product_id)->decrement('quantity',$item->quantity);
+                Product::find($item->product_id)->decrement('quantity', $item->quantity);
                 $item->delete();
             }
             $order = $this->model->create([
@@ -105,7 +106,7 @@ class OrderRepository extends BaseRepository
             $order->orderDetails()->createMany($orderDetailData);
             DB::commit();
             return [
-                'message' => 'Đặt hàng thành công',
+                'order' => $order
             ];
         } catch (\Exception $e) {
             DB::rollBack();
@@ -149,6 +150,32 @@ class OrderRepository extends BaseRepository
     public function changeStatus($data)
     {
         $this->model->whereIn('id', $data->products)->update(['status' => $data->status]);
+        return [
+            'message' => 'Success',
+        ];
+    }
+    public function checkPaypalPayment($data)
+    {
+        $provider = new PayPalClient;
+        $provider->getAccessToken();
+        $billDetail = $provider->showOrderDetails($data->bill_id);
+        if(!array_key_exists('id',$billDetail)) {
+            return [
+                'errors' => true,
+                'message' => 'Payment not found',
+            ];
+        }
+        $order = $this->model->where('order_id', $billDetail['order_id'])->where('kind_of_payment', Order::KIND_PAYPAL)->first();
+        if (!$order) {
+            return [
+                'errors' => true,
+                'message' => 'Error',
+            ];
+        }
+        $order->update([
+            'status' => Order::STATUS_PAYMENT_SUCCESS,
+            'bill_id' => $billDetail['id'],
+        ]);
         return [
             'message' => 'Success',
         ];
