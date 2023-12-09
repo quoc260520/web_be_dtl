@@ -165,8 +165,8 @@ class OrderRepository extends BaseRepository
                 'message' => 'Payment not found',
             ];
         }
-        $order = $this->model->where('order_id', $billDetail['order_id'])->where('kind_of_payment', Order::KIND_PAYPAL)->first();
-        if (!$order) {
+        $order = $this->model->where('order_id', $billDetail['purchase_units'][0]['description'])->where('kind_of_payment', Order::KIND_PAYPAL)->first();
+        if (!$order || $billDetail['status'] != 'COMPLETED') {
             return [
                 'errors' => true,
                 'message' => 'Error',

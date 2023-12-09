@@ -76,7 +76,7 @@ class ProductRepository extends BaseRepository
     }
     public function getById($id)
     {
-        return $this->model->with('user:id,name')->findOrFail($id);
+        return $this->model->with('user:id,name', 'category:id,name')->findOrFail($id);
     }
     public function create($data)
     {

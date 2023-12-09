@@ -57,7 +57,14 @@ class CartRepository extends BaseRepository
         ];
     }
     public function update($id, $data, $fromAdd = false) {
-        $product = Product::find($data->product);
+        $cartDetail = $this->cartDetail->find($id);
+        if(!$cartDetail) {
+            return [
+                'errors' => 'Errors',
+                'message' => 'Sản phẩm không tồn tại trong giỏ hàng'
+            ];
+        }
+        $product = Product::find($cartDetail->product_id);
         if(!$product || $product->status == Product::STATUS_UN_APPROVE || $product->status == Product::STATUS_OUT_STOCK) {
             return [
                 'errors' => 'Not Found',
@@ -68,13 +75,6 @@ class CartRepository extends BaseRepository
             return [
                 'errors' => 'Errors',
                 'message' => 'Số lương sản phẩm không đủ'
-            ];
-        }
-        $cartDetail = $this->cartDetail->find($id);
-        if(!$cartDetail) {
-            return [
-                'errors' => 'Errors',
-                'message' => 'Sản phẩm không tồn tại trong giỏ hàng'
             ];
         }
         if($fromAdd) {
