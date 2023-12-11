@@ -90,6 +90,7 @@ Route::middleware(['auth:sanctum', 'role:admin|client'])->prefix('order')->group
     Route::get('/get-by-user', [OrderController::class, 'getByUser'])->name('order.get_by_user');
     Route::get('/', [OrderController::class, 'index'])->name('order.index');
     Route::get('/{id}', [OrderController::class, 'getById'])->name('order.get_by_id');
+    Route::get('/cancel/{id}', [OrderController::class, 'cancel'])->name('order.cancel');
     Route::post('/check-paypal', [OrderController::class, 'checkPaypalPayment'])->name('order.check_paypal');
     Route::post('/create', [OrderController::class, 'create'])->name('order.create');
     Route::post('/update/{id}', [OrderController::class, 'update'])->name('order.update');

@@ -18,12 +18,15 @@ class OrderRepository extends BaseRepository
     protected $orderDetail;
 
     protected $cartDetail;
+    protected $product;
 
-    public function __construct(Order $model, OrderDetail $orderDetail, CartDetail $cartDetail)
+
+    public function __construct(Order $model, OrderDetail $orderDetail, CartDetail $cartDetail, Product $product)
     {
         $this->model = $model;
         $this->orderDetail = $orderDetail;
         $this->cartDetail = $cartDetail;
+        $this->product = $product;
     }
     public function index($request, $userId = null)
     {
@@ -159,7 +162,7 @@ class OrderRepository extends BaseRepository
         $provider = new PayPalClient;
         $provider->getAccessToken();
         $billDetail = $provider->showOrderDetails($data->bill_id);
-        if(!array_key_exists('id',$billDetail)) {
+        if (!array_key_exists('id', $billDetail)) {
             return [
                 'errors' => true,
                 'message' => 'Payment not found',
@@ -179,5 +182,32 @@ class OrderRepository extends BaseRepository
         return [
             'message' => 'Success',
         ];
+    }
+    public function cancel($id)
+    {
+        $order = $this->model->with('orderDetails')->findOrFail($id);
+        if ($order->status == Order::STATUS_CANCEL) {
+            return [
+                'errors' => true,
+                'message' => 'Đơn hàng đã hủy',
+            ];
+        }
+        try {
+            DB::beginTransaction();
+            $order->update(['status' => Order::STATUS_CANCEL]);
+            foreach ($order->orderDetails as $detail) {
+                $this->product->where('id', $detail->product_id)->increment('quantity', $detail->quantity);
+            }
+            DB::commit();
+            return [
+                'message' => 'Cancel success',
+            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return [
+                'errors' => true,
+                'message' => 'Cancel failed',
+            ];
+        }
     }
 }

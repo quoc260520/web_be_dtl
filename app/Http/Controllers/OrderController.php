@@ -53,4 +53,8 @@ class OrderController extends Controller
         }
         return $this->resultResponse($this->orderRepository->checkPaypalPayment($request));
     }
+    public function cancel(Request $request, $id)
+    {
+        return $this->resultResponse($this->orderRepository->cancel($id));
+    }
 }
