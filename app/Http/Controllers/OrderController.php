@@ -57,4 +57,8 @@ class OrderController extends Controller
     {
         return $this->resultResponse($this->orderRepository->cancel($id));
     }
+    public function getOrderSell(Request $request)
+    {
+        return $this->resultResponse($this->orderRepository->getOrderSell($request, Auth::user()->id));
+    }
 }

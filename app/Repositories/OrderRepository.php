@@ -210,4 +210,21 @@ class OrderRepository extends BaseRepository
             ];
         }
     }
+    public function getOrderSell($data, $sellId)
+    {
+        $order = $this->model
+            ->whereHas('orderDetails.product', function (Builder $q) use ($sellId) {
+                $q->where('user_id', $sellId);
+            })
+            ->with(['user:id,name,email', 'orderDetails.product.user:id,name,email', 'orderDetails' => function ($query) use ($sellId) {
+                return  $query->whereHas('product', function (Builder $q) use ($sellId) {
+                    $q->where('user_id', $sellId);
+                });
+            }])
+            ->paginate(20);
+        return [
+            'path_image' => asset('storage/product'),
+            'order' => $order,
+        ];
+    }
 }
