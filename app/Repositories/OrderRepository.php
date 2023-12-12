@@ -46,7 +46,7 @@ class OrderRepository extends BaseRepository
         })->with(['user:id,name,email', 'orderDetails.product.user:id,name,email', 'orderDetails.product' => function ($query) {
             return $query->withTrashed();
         }])
-        ->orderBy('date_order', 'ASC')
+        ->orderBy('date_order', 'DESC')
         ->paginate($paginate);
         return [
             'path_image' => asset('storage/product'),
