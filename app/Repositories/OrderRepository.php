@@ -66,7 +66,7 @@ class OrderRepository extends BaseRepository
     {
         try {
             DB::beginTransaction();
-            $cartDetail = $this->cartDetail->whereIn('id', $data->cart_detail)
+            $cartDetail = $this->cartDetail->whereIn('id', is_array($data->cart_detail) ? $data->cart_detail : array($data->cart_detail))
                 ->with(['product' => function ($query) {
                     return $query->where('status', Product::STATUS_APPROVE);
                 }])
