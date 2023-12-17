@@ -88,6 +88,7 @@ class ProductRepository extends BaseRepository
             'status' =>  Auth::user()->hasRole('admin') ? Product::STATUS_APPROVE : PRODUCT::STATUS_UN_APPROVE,
             'price' =>  $data->price,
             'image' =>  json_encode($data->image),
+            'image_master' =>  $data->image_master,
             'description' =>  $data->description,
             'note' =>  $data->note,
         ]);
@@ -111,6 +112,7 @@ class ProductRepository extends BaseRepository
             'status' =>  $data->category,
             'price' =>  $data->price  ??  $product->price,
             'image' =>  json_encode($data->image) ?? $product->image,
+            'image_master' =>  $data->image_master ?? $product->image_master,
             'description' =>  $data->description ?? $product->description,
             'note' =>  $data->note ?? $product->note,
         ]);
@@ -131,6 +133,9 @@ class ProductRepository extends BaseRepository
             foreach (json_decode($product->image) as $image) {
                 $this->deleteImage('product', $image);
             }
+        }
+        if ($product->image_master) {
+                $this->deleteImage('product', $product->image_master);
         }
         $product->delete();
         return [

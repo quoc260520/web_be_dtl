@@ -27,6 +27,7 @@ class Product extends Model
         'price',
         'status',
         'image',
+        'image_master',
         'description',
         'note'
     ];

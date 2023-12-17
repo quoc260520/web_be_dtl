@@ -22,6 +22,7 @@ class ProductRequest extends BaseRequest
                 'quantity' => [Rule::requiredIf(!$this->id),'nullable', 'numeric', 'min:0'],
                 'status' => ['nullable', 'numeric', Rule::in([Product::STATUS_UN_APPROVE, PRODUCT::STATUS_APPROVE, Product::STATUS_OUT_STOCK])],
                 'price' => [Rule::requiredIf(!$this->id),'nullable', 'numeric', 'min:0'],
+                'image_master' => ['nullable', 'array'],
                 'image' => ['nullable', 'array'],
                 'image.*' => ['nullable', 'string'],
                 'description' => ['nullable', 'string'],
@@ -37,6 +38,7 @@ class ProductRequest extends BaseRequest
             'status' => 'trạng thái',
             'price' => 'giá',
             'image' => 'hình ảnh',
+            'image_master' => 'hình ảnh',
             'description' => 'mô tả',
             'note' => 'ghi chú'
         ];
