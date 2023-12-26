@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    public function statistics()
+    public function statistics(Request $request)
     {
         $user = User::count();
         $products = Product::select('status', DB::raw('count(*) as total'))
@@ -39,10 +39,61 @@ class DashboardController extends Controller
         foreach ($orders as $order) {
             $orderCount[$convertStatusOrder[$order->status]] = $order->total;
         }
+        $filter = $request->get('filter');
+        $status = $request->get('status');
+        $startDate = $request->get('start_date');
+        $endDate = $request->get('end_date');
+        $category = $request->get('category');
+        switch ($filter) {
+            case 'date':
+                $formatDate = "%Y-%m-%d";
+                break;
+            case 'month':
+                $formatDate = "%Y-%m";
+                break;
+            case 'year':
+                $formatDate = "%Y";
+                break;
+            default:
+                $formatDate = "%Y-%m-%d";
+                break;
+        }
+        $order = Order::when($status, function ($query) use ($status) {
+            return $query->where('status', $status);
+        })->when($startDate, function ($query) use ($startDate) {
+            return $query->whereDate('date_order','>=',$startDate);
+        })->when($endDate, function ($query) use ($endDate) {
+            return $query->whereDate('date_order','<=', $endDate);
+        })
+        ->orderBy('date_order', 'ASC')
+        ->select('id','user_id','status', 'total_price', 'kind_of_payment',DB::raw("DATE_FORMAT(date_order, '$formatDate') as date_order"))
+        ->get();
+        $orderFormat = [];
+        foreach ($order as $item) {
+            if(array_key_exists($item->date_order, $orderFormat)) {
+                $old = $orderFormat[$item->date_order];
+                $orderFormat[$item->date_order] = [
+                    'total_quantity' => $old['total_quantity'] + 1,
+                    'total_price' => $item->total_price + $old['total_price']
+                ];
+            } else {
+                $orderFormat[$item->date_order] = [
+                    'total_quantity' => 1,
+                    'total_price' => $item->total_price
+                ];
+            }
+        }
+        $newFormat = [];
+        foreach ($orderFormat as $key => $item) {
+            array_push($newFormat, array_merge([
+                'date' => $key
+            ], $item));
+        }
         return [
             'user' => $user,
             'productCount' => $productCount,
-            'orderCount' => $orderCount
+            'orderCount' => $orderCount,
+            'orderFilter' => $newFormat
         ];
     }
 }
