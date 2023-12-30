@@ -62,7 +62,7 @@ class ProductController extends Controller
     public function updateImage(Request $request){
         $validate = Validator::make($request->all(), [
             'image' => ['required', 'file', 'image', 'mimes:jpeg,jpg,png,gif'],
-            'folder' => 'required|in:product,category',
+            'folder' => 'required|in:product,category,collection',
         ]);
 
         if ($validate->fails()) {
@@ -77,7 +77,7 @@ class ProductController extends Controller
     public function deleteImage(Request $request){
         $validate = Validator::make($request->all(), [
             'image' => ['required', 'string'],
-            'folder' => 'required|in:product,category',
+            'folder' => 'required|in:product,category,collection',
         ]);
         if ($validate->fails()) {
             return $this->responseData( [

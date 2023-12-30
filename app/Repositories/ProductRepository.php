@@ -22,6 +22,7 @@ class ProductRepository extends BaseRepository
     {
         $name = $request->name;
         $category = is_numeric($request->category) ? [$request->category] : ($request->category ?? []);
+        $collection = $request->collection;
         $priceMin = $request->price_min;
         $priceMax = $request->price_max;
         $status = $request->status;
@@ -32,6 +33,8 @@ class ProductRepository extends BaseRepository
             $query->where('user_id', $userId);
         })->when(count($category), function ($query) use ($category) {
             $query->whereIn('category_id',$category);
+        })->when($collection, function ($query) use ($collection) {
+            $query->where('collection_id',$collection);
         })->when($priceMin, function ($query) use ($priceMin) {
             $query->where('price', '>=', (int)$priceMin);
         })->when($priceMax, function ($query) use ($priceMax) {
@@ -39,7 +42,7 @@ class ProductRepository extends BaseRepository
         })->when(is_numeric($status), function ($query) use ($status) {
             $query->where('status', '=', (int)$status);
         })
-            ->with('user:id,name', 'category:id,name')
+            ->with('user:id,name', 'category:id,name', 'collection:id,name')
             ->paginate($paginate);
         $minPrice =  $this->model->where('status', Product::STATUS_APPROVE)->min("price");
         $maxPrice =  $this->model->where('status', Product::STATUS_APPROVE)->max("price");
@@ -61,7 +64,7 @@ class ProductRepository extends BaseRepository
                     ->orderBy('total','desc')
                     ->take(10)
                     ->pluck('product_id');
-        $product = $this->model->whereIn('id',$collection->toArray())->with('user:id,name', 'category:id,name')
+        $product = $this->model->whereIn('id',$collection->toArray())->with('user:id,name', 'category:id,name', 'collection:id,name')
                     ->where('status', [Product::STATUS_APPROVE])
                     ->get();
             if(count($product) == 10) {
@@ -69,19 +72,20 @@ class ProductRepository extends BaseRepository
             } else {
                 $productBonus = $this->model->whereNotIn('id',$collection->toArray())
                                 ->where('status', [Product::STATUS_APPROVE])
-                                ->with('user:id,name', 'category:id,name')
+                                ->with('user:id,name', 'category:id,name','collection:id,name')
                                 ->take(10 - count($product))->get();
                 return array_merge($product->toArray(), $productBonus->toArray());
             }
     }
     public function getById($id)
     {
-        return $this->model->with('user:id,name', 'category:id,name')->findOrFail($id);
+        return $this->model->with('user:id,name', 'category:id,name', 'collection:id,name')->findOrFail($id);
     }
     public function create($data)
     {
         $this->model->create([
             'category_id' => $data->category,
+            'collection_id' => $data->collection,
             'user_id' => Auth::user()->id,
             'name' =>  $data->name,
             'quantity' =>  $data->quantity,
@@ -107,6 +111,7 @@ class ProductRepository extends BaseRepository
         }
         $product->update([
             'category_id' => $data->category ?? $product->category_id,
+            'collection_id' => $data->collection,
             'name' =>  $data->name ??  $product->name,
             'quantity' =>  $data->quantity  ??  $product->name,
             'status' =>  $data->category,

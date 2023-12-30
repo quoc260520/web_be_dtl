@@ -18,6 +18,7 @@ class ProductRequest extends BaseRequest
     {
         return [
                 'category' => [Rule::requiredIf(!$this->id),'nullable', 'exists:categories,id'],
+                'collection' => [Rule::requiredIf(!$this->id),'nullable', 'exists:collections,id'],
                 'name' => [Rule::requiredIf(!$this->id),'nullable', 'string', 'min:3'],
                 'quantity' => [Rule::requiredIf(!$this->id),'nullable', 'numeric', 'min:0'],
                 'status' => ['nullable', 'numeric', Rule::in([Product::STATUS_UN_APPROVE, PRODUCT::STATUS_APPROVE, Product::STATUS_OUT_STOCK])],
@@ -33,6 +34,7 @@ class ProductRequest extends BaseRequest
     {
         return [
             'category' => 'tên danh mục',
+            'collection' => 'tên bộ sưu tập',
             'name' => 'tên sản phẩm',
             'quantity' => 'số lượng',
             'status' => 'trạng thái',

@@ -21,6 +21,7 @@ class Product extends Model
      */
     protected $fillable = [
         'category_id',
+        'collection_id',
         'user_id',
         'name',
         'quantity',
@@ -57,5 +58,9 @@ class Product extends Model
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+    public function collection()
+    {
+        return $this->belongsTo(Collection::class);
     }
 }

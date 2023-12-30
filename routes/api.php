@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
@@ -100,4 +101,13 @@ Route::middleware(['auth:sanctum', 'role:admin|client'])->prefix('order')->group
 
 Route::middleware(['auth:sanctum', 'role:admin'])->prefix('statistics')->group(function () {
     Route::get('statistics/', [DashboardController::class, 'statistics'])->name('statistics');
+});
+Route::prefix('collection')->group(function () {
+    Route::get('/all', [CollectionController::class, 'index'])->name('collection.list');
+    Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+        Route::get('/{id}', [CollectionController::class, 'getById'])->name('collection.get_by_id');
+        Route::post('/create', [CollectionController::class, 'create'])->name('collection.create');
+        Route::post('/update/{id}', [CollectionController::class, 'update'])->name('collection.update');
+        Route::delete('/delete/{id}', [CollectionController::class, 'delete'])->name('collection.delete');
+    });
 });
