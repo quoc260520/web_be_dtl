@@ -88,8 +88,8 @@ class CartRepository extends BaseRepository
             'message' => 'Ok',
         ];
     }
-    public function delete($id) {
-        $cartDetail =  $this->cartDetail->find($id);
+    public function delete($request) {
+        $cartDetail =  $this->cartDetail->whereIn('id', $request->ids);
         if(!$cartDetail) {
             return [
                 'errors' => 'Not found',

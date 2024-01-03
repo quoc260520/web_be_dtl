@@ -80,7 +80,7 @@ Route::middleware(['auth:sanctum', 'role:admin|client'])->prefix('cart')->group(
     Route::get('/', [CartController::class, 'index'])->name('cart.index');
     Route::post('/add', [CartController::class, 'add'])->name('cart.create');
     Route::post('/update/{id}', [CartController::class, 'update'])->name('cart.update');
-    Route::delete('/delete/{id}', [CartController::class, 'delete'])->name('cart.delete');
+    Route::post('/delete', [CartController::class, 'delete'])->name('cart.delete');
 });
 Route::middleware(['auth:sanctum', 'role:admin|client'])->prefix('image')->group(function () {
     Route::post('/upload', [ProductController::class, 'updateImage'])->name('image.upload');
