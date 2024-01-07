@@ -101,6 +101,8 @@ Route::middleware(['auth:sanctum', 'role:admin|client'])->prefix('order')->group
 
 Route::middleware(['auth:sanctum', 'role:admin'])->prefix('statistics')->group(function () {
     Route::get('statistics/', [DashboardController::class, 'statistics'])->name('statistics');
+    Route::get('product/', [DashboardController::class, 'product'])->name('product');
+    Route::get('category/', [DashboardController::class, 'category'])->name('category');
 });
 Route::prefix('collection')->group(function () {
     Route::get('/all', [CollectionController::class, 'index'])->name('collection.list');

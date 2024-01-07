@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -95,5 +97,28 @@ class DashboardController extends Controller
             'orderCount' => $orderCount,
             'orderFilter' => $newFormat
         ];
+    }
+    public function product(Request $request) {
+        $startDate = $request->get('start_date');
+        $endDate = $request->get('end_date');
+        $order = Order::join('order_details', 'orders.id', 'order_details.order_id')
+        ->whereDate('date_order', '>=', $startDate)
+        ->whereDate('date_order', '<=', $endDate)
+        ->distinct()
+        ->pluck('product_id');
+        $product = Product::whereNotIn('id',$order)->get();
+        return $product;
+    }
+    public function category(Request $request) {
+        $category = Order::whereMonth('date_order', Carbon::now())
+        ->leftJoin('order_details', 'orders.id', 'order_details.order_id')
+        ->leftJoin('products', 'order_details.product_id', 'products.id')
+        ->leftJoin('categories', 'products.category_id', 'categories.id')
+        ->groupBy('categories.id')
+        ->select('categories.id', 'categories.name', DB::raw('COUNT(categories.id) as total'))
+        ->orderBy('total', 'desc')
+        ->take(5)
+        ->get();
+        return $category;
     }
 }
