@@ -115,8 +115,8 @@ class DashboardController extends Controller
         ->leftJoin('products', 'order_details.product_id', 'products.id')
         ->leftJoin('categories', 'products.category_id', 'categories.id')
         ->groupBy('categories.id')
-        ->select('categories.id', 'categories.name', DB::raw('COUNT(categories.id) as total'))
-        ->orderBy('total', 'desc')
+        ->select('categories.id', 'categories.name', DB::raw('COUNT(categories.id) as total'), DB::raw('SUM(order_details.quantity) as total_quantity'))
+        ->orderBy('total_quantity', 'desc')
         ->take(5)
         ->get();
         return $category;
