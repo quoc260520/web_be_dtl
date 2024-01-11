@@ -110,7 +110,8 @@ class DashboardController extends Controller
         return $product;
     }
     public function category(Request $request) {
-        $category = Order::whereMonth('date_order', Carbon::now())
+        $category = Order::where('date_order','<=' ,Carbon::now())
+        ->where('date_order','>=' ,Carbon::now()->subDays(30))
         ->leftJoin('order_details', 'orders.id', 'order_details.order_id')
         ->leftJoin('products', 'order_details.product_id', 'products.id')
         ->leftJoin('categories', 'products.category_id', 'categories.id')
