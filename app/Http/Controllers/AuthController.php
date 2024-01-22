@@ -7,6 +7,7 @@ use App\Repositories\UserRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
@@ -21,7 +22,7 @@ class AuthController extends Controller
                 $request->all(),
                 [
                     'name' => 'required|min:3',
-                    'email' => 'required|email|unique:users,email',
+                    'email' => ['required','email',Rule::unique('users')->where('deleted_at', null)],
                     'password' => 'required|min:6|max:50',
                     'password_confirmation' => 'required|same:password'
                 ],

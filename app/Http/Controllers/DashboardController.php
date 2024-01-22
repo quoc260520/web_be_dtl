@@ -21,16 +21,16 @@ class DashboardController extends Controller
         $productCount = [];
         $orderCount = [];
         $convertStatusProduct = [
-            'un_approve',
-            'approve',
-            'out_stock'
+            'Chưa duyệt',
+            'Đã duyệt',
+            'Hết hàng'
         ];
         $convertStatusOrder = [
-            1 => 'status_ordered',
-            2 => 'status_delivering',
-            3 => 'status_payment_success',
-            4 => 'status_success',
-            5 => 'status_cancel'
+            1 => 'Chưa thanh toán',
+            2 => 'Đang giao hàng',
+            3 => 'Thanh toán thành công',
+            4 => 'Giao thành công',
+            5 => 'Đơn hàng đã hủy'
         ];
         foreach ($products as $product) {
             $productCount[$convertStatusProduct[$product->status]] = $product->total;
