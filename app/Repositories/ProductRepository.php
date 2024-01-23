@@ -82,6 +82,7 @@ class ProductRepository extends BaseRepository
                                 ->orderBy('quantity','desc')
                                 ->orderBy('created_at')
                                 ->take(8 - $productClone->count())->get();
+                return $product->get();
                 return $productBonus->toArray();
                 return array_merge($product->toArray(), $productBonus->toArray());
             }
