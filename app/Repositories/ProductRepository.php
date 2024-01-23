@@ -77,6 +77,7 @@ class ProductRepository extends BaseRepository
             if($productClone->count() == 10) {
                 return $product->get();
             } else {
+                return $product->get();
                 $productBonus = $this->model->whereNotIn('id',$collection->toArray())
                                 ->where('status', [Product::STATUS_APPROVE])
                                 ->with('user:id,name', 'category:id,name','collection:id,name')
