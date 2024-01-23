@@ -72,12 +72,10 @@ class ProductRepository extends BaseRepository
                     ->orderBy('status')
                     ->orderBy('quantity','desc')
                     ->orderBy('created_at');
-                    //->get();
         $productClone = $product;
             if($productClone->count() == 10) {
                 return $product->get();
             } else {
-                return $product->get();
                 $productBonus = $this->model->whereNotIn('id',$collection->toArray())
                                 ->where('status', [Product::STATUS_APPROVE])
                                 ->with('user:id,name', 'category:id,name','collection:id,name')
@@ -86,6 +84,7 @@ class ProductRepository extends BaseRepository
                                 ->orderBy('quantity','desc')
                                 ->orderBy('created_at')
                                 ->take(10 - $productClone->count())->get();
+                return $productBonus->toArray();
                 return array_merge($product->toArray(), $productBonus->toArray());
             }
     }
