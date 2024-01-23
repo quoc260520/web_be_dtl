@@ -69,21 +69,19 @@ class ProductRepository extends BaseRepository
                     ->pluck('product_id');
         $product = $this->model->whereIn('id',$collection->toArray())->with('user:id,name', 'category:id,name', 'collection:id,name')
                     ->where('status', [Product::STATUS_APPROVE])
-                    ->orderBy('status')
                     ->orderBy('quantity','desc')
                     ->orderBy('created_at');
         $productClone = $product;
-            if($productClone->count() == 10) {
+            if($productClone->count() == 8) {
                 return $product->get();
             } else {
                 $productBonus = $this->model->whereNotIn('id',$collection->toArray())
                                 ->where('status', [Product::STATUS_APPROVE])
                                 ->with('user:id,name', 'category:id,name','collection:id,name')
-                                ->union($product)
-                                ->orderBy('status')
+                                // ->union($product)
                                 ->orderBy('quantity','desc')
                                 ->orderBy('created_at')
-                                ->take(10 - $productClone->count())->get();
+                                ->take(8 - $productClone->count())->get();
                 return $productBonus->toArray();
                 return array_merge($product->toArray(), $productBonus->toArray());
             }
