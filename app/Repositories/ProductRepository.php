@@ -43,6 +43,8 @@ class ProductRepository extends BaseRepository
             $query->where('status', '=', (int)$status);
         })
             ->with('user:id,name', 'category:id,name', 'collection:id,name')
+            ->orderBy('status')
+            ->orderBy('created_at')
             ->paginate($paginate);
         $minPrice =  $this->model->where('status', Product::STATUS_APPROVE)->min("price");
         $maxPrice =  $this->model->where('status', Product::STATUS_APPROVE)->max("price");
@@ -66,6 +68,8 @@ class ProductRepository extends BaseRepository
                     ->pluck('product_id');
         $product = $this->model->whereIn('id',$collection->toArray())->with('user:id,name', 'category:id,name', 'collection:id,name')
                     ->where('status', [Product::STATUS_APPROVE])
+                    ->orderBy('status')
+                    ->orderBy('created_at')    
                     ->get();
             if(count($product) == 10) {
                 return $product;
@@ -73,6 +77,8 @@ class ProductRepository extends BaseRepository
                 $productBonus = $this->model->whereNotIn('id',$collection->toArray())
                                 ->where('status', [Product::STATUS_APPROVE])
                                 ->with('user:id,name', 'category:id,name','collection:id,name')
+                                ->orderBy('status')
+                                ->orderBy('created_at')
                                 ->take(10 - count($product))->get();
                 return array_merge($product->toArray(), $productBonus->toArray());
             }
