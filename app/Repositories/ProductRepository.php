@@ -78,13 +78,13 @@ class ProductRepository extends BaseRepository
                 $productBonus = $this->model->whereNotIn('id',$collection->toArray())
                                 ->where('status', [Product::STATUS_APPROVE])
                                 ->with('user:id,name', 'category:id,name','collection:id,name')
-                                // ->union($product)
+                                ->union($product)
                                 ->orderBy('quantity','desc')
                                 ->orderBy('created_at')
                                 ->take(8 - $productClone->count())->get();
                 // return $product->get();
-                return $productBonus->toArray();
-                return array_merge($product->toArray(), $productBonus->toArray());
+                return $productBonus;
+                // return array_merge($product->toArray(), $productBonus->toArray());
             }
     }
     public function getById($id)
