@@ -71,18 +71,19 @@ class ProductRepository extends BaseRepository
                     ->where('status', [Product::STATUS_APPROVE])
                     ->orderBy('status')
                     ->orderBy('quantity','desc')
-                    ->orderBy('created_at')    
-                    ->get();
-            if(count($product) == 10) {
-                return $product;
+                    ->orderBy('created_at');
+                    //->get();
+            if($product->count() == 10) {
+                return $product->get();
             } else {
                 $productBonus = $this->model->whereNotIn('id',$collection->toArray())
                                 ->where('status', [Product::STATUS_APPROVE])
                                 ->with('user:id,name', 'category:id,name','collection:id,name')
+                                ->union($product)
                                 ->orderBy('status')
                                 ->orderBy('quantity','desc')
                                 ->orderBy('created_at')
-                                ->take(10 - count($product))->get();
+                                ->take(10 - $product->count())->get();
                 return array_merge($product->toArray(), $productBonus->toArray());
             }
     }
